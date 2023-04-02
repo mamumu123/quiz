@@ -13,5 +13,12 @@
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},
+	"easycom": {  
+	        // 下载安装的方式需要前面的"@/"，npm安装的方式无需"@/"  
+	        // 下载安装方式  
+	        "^u-(.*)": "@/uni_modules/uview-ui/components/u-$1/u-$1.vue"  
+	        // npm安装方式  
+	        // "^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"  
+	    },
 	"uniIdRouter": {}
 }

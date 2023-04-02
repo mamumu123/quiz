@@ -1,16 +1,17 @@
 <template>
-	<u-button type="primary" text="确定"></u-button>
+	
 </template>
 
 <script>
 	export default {
-			data() {
-					return {
-						disabled: true
-					};
-				}
-
+		data() {
+			return {
+				count: 4,
+				keyword: '遥看瀑布挂前川',
+				value: 2
+			}
 		}
+	}
 </script>
 
 <style>

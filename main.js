@@ -1,8 +1,5 @@
 import App from './App'
 
-// main.js，注意要在use方法之后执行
-import uView from '@/uni_modules/uview-ui'
-Vue.use(uView)
 
 
 // #ifndef VUE3
@@ -13,6 +10,9 @@ const app = new Vue({
     ...App
 })
 app.$mount()
+// main.js，注意要在use方法之后执行
+import uView from '@/uni_modules/uview-ui'
+Vue.use(uView)
 // #endif
 
 // #ifdef VUE3
