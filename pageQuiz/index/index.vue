@@ -1,8 +1,9 @@
 <template>
-	<view>
+	<view class='container'>
 		<transition name="fade">
-			<view class="" v-if="isReady">
-				<button type="default" @click="()=>onSwitch(STATUS_MAP.playing)">开始</button>
+			<view class="start-container" v-if="isReady">
+				<view>答对三道题则过关</view>
+				<button type="" :plain="true" @click="()=>onSwitch(STATUS_MAP.playing)">开始</button>
 			</view>
 
 			<view class="" v-else-if="isPlaying">
@@ -12,14 +13,22 @@
 				</view>
 
 				<view>
-					<u-button :disabled="isSelected" type="primary" @click="()=>onSelect(index)" :plain="true" :text="quiz"
-						v-for="(quiz, index) in currentQuiz.options"></u-button>
+					<u-button :disabled="isSelected" :type="currentType(index)" @click="()=>onSelect(index)"
+						:plain="true" :text="quiz" v-for="(quiz, index) in currentQuiz.options" class="btn" />
 				</view>
 
-				<button type="default" @click="onNext">{{ nextText }}</button>
+				<button :disabled="!isSelected" type="default" @click="onNext">{{ nextText }}</button>
+				<view class="">
+					{{ feedbackText }}
+				</view>
+				<view>
+					<u-icon name="heart-fill" size="28"></u-icon>
+				</view>
 
 			</view>
 			<view class="" v-else>
+				<img src="https://upload.wikimedia.org/wikipedia/commons/9/94/%E6%9D%9C%E5%A6%82%E6%99%A6.jpg" width="50" alt="">
+				<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/%E6%88%BF%E7%8E%84%E9%BE%84.jpg" width="50" alt="">
 				<button type="default" @click="()=>onSwitch(STATUS_MAP.ready)">再来一次</button>
 			</view>
 		</transition>
@@ -30,6 +39,10 @@
 	import {
 		STATUS_MAP,
 		TOTAL_NUMBER,
+		ERROR_TOAST,
+		COUNT_ERROE,
+		GOOD_WORDS,
+		COUNT_CORRECT,
 	} from '@/constants/index.js'
 	import {
 		getRandomArray
@@ -38,15 +51,18 @@
 	export default {
 		data() {
 			return {
-				// status: STATUS_MAP.ready,
-				status: STATUS_MAP.playing,
+				// status: STATUS_MAP.ready,// 当前状态， 准备 / 开始 /结束
+				status: STATUS_MAP.end,
 				STATUS_MAP,
-				quizList: [],
-				currentIndex: 0,
-				rankList: [],
-				score: 0,
-				selectIndex: -1,
-				isSelected: false,
+				quizList: [], // all data
+				currentIndex: 0, // 当前题号
+				rankList: [], // 随机 n 个不重复数字
+				score: 0, // 分数
+				selectIndex: -1, // 当前题目中选择到的 index
+				isSelected: false, // 是否已选择
+				countError: COUNT_ERROE, // 错误机会
+				goodList: [], // 夸人列表
+				GOOD_WORDS,
 			}
 		},
 		computed: {
@@ -60,19 +76,39 @@
 				return this.status === STATUS_MAP.end
 			},
 			currentQuiz() {
-				const {
-					quizList
-				} = this;
 				const inx = this.rankList[this.currentIndex];
-				const cur = quizList[inx] || {}
-				console.log('cur', cur, this.currentIndex)
-				return cur;
+				return this.quizList[inx] || {}
+			},
+			currentRealAnswer() {
+				return (this.currentQuiz?.answer - 1);
 			},
 			nextText() {
-				return this.lastQuiz ? '交卷' : '下一题';
+				return this.lastQuiz ? '去拍照' : '下一题';
 			},
 			lastQuiz() {
-				return this.currentIndex === (TOTAL_NUMBER - 1)
+				// 10 道题目
+				// return this.currentIndex === (TOTAL_NUMBER - 1)
+				// 达到阈值
+				return this.score === COUNT_CORRECT || this.countError === 0
+			},
+			isCorrect() {
+				return this.selectIndex === this.currentRealAnswer;
+			},
+			feedbackText() {
+				// !: 这个 console 不好删
+				console.log('isCorrect', this.isCorrect, this.currentRealAnswer)
+				if (!this.isSelected) {
+					return ''
+				}
+				if (this.isCorrect) {
+					// TODO：这里随机上几百个夸人的次
+					return GOOD_WORDS[this.goodList[this.currentGoodIndex]];
+				} else {
+					return ERROR_TOAST[this.countError]
+				}
+			},
+			currentGoodIndex() {
+				return this.score - 1;
 			}
 		},
 		created() {
@@ -83,6 +119,7 @@
 					if (res?.data?.length) {
 						that.quizList = res.data;
 						that.rankList = getRandomArray(0, that.quizList.length, TOTAL_NUMBER);
+						that.goodList = getRandomArray(0, GOOD_WORDS.length, COUNT_CORRECT);
 						console.log('rankList', that.rankList)
 					}
 				},
@@ -95,27 +132,71 @@
 		},
 		methods: {
 			onSwitch(val = STATUS_MAP.ready) {
-				console.log('val', val)
 				this.status = val;
 			},
 			onSelect(index) {
-				console.log('index', index)
 				this.isSelected = true;
 				this.selectIndex = index;
-				
+				if (this.isCorrect) {
+					this.score += 1;
+				} else {
+					this.countError -= 1;
+				}
 			},
 			onNext() {
 				if (this.lastQuiz) {
 					return
 				}
 				this.currentIndex += 1;
+				this.reset();
+			},
+			reset() {
 				this.isSelected = false;
+				this.selectIndex = -1;
+			},
+			resetAll() {
+				this.reset();
+				this.currentIndex = 0;
+				this.countError = COUNT_ERROE;
+			},
+			currentType(index) {
+				if (!this.isSelected) {
+					return 'primary';
+				}
+				if (index === this.currentRealAnswer) {
+					return 'success'
+				}
+				if (this.selectIndex === index && index !== this.currentRealAnswer) {
+					return 'error'
+				}
+				return 'primary';
 			}
 		}
 	}
 </script>
 
 <style>
+
+	.container {
+		width: 100vw;
+		height: 100vh;
+		/* background-image: url('@/static/bg.png'); */
+		position: relative;
+	}
+
+	.start-container {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		/* position: absolute; */
+		/* top: 50%; */
+		/* transform: translateY(-50%); */
+
+	}
+
 	.fade-enter-active,
 	.fade-leave-active {
 		transition: opacity .5s
@@ -124,5 +205,9 @@
 	.fade-enter,
 	.fade-leave-to {
 		opacity: 0
+	}
+
+	.btn {
+		margin: 10px auto;
 	}
 </style>
