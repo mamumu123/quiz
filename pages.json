@@ -6,7 +6,16 @@
 				"navigationBarTitleText": "uni-app"
 			}
 		}
-	],
+	    ,{
+            "path" : "pageQuiz/index/index",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "quiz",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+    ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",

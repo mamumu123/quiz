@@ -1,15 +1,17 @@
 <template>
-	
+	<view></view>
 </template>
 
 <script>
 	export default {
 		data() {
 			return {
-				count: 4,
-				keyword: '遥看瀑布挂前川',
-				value: 2
 			}
+		},
+		onLoad({}) {
+			uni.navigateTo({
+				url: '/pageQuiz/index/index'
+			})
 		}
 	}
 </script>
