@@ -3,3 +3,5 @@ export const STATUS_MAP = {
 	playing: 'playing',
 	end: 'end',
 }
+
+export const TOTAL_NUMBER = 10;
