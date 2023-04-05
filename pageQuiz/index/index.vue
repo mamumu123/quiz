@@ -2,33 +2,53 @@
 	<view class='container'>
 		<transition name="fade">
 			<view class="start-container" v-if="isReady">
-				<view>答对三道题则过关</view>
-				<button type="" :plain="true" @click="()=>onSwitch(STATUS_MAP.playing)">开始</button>
+				<view>
+					答对三道题则过关
+				</view>
+				<image src="../../static/2.png" mode="widthFix" class="img_start"></image>
+				<image src="../../static/3.png" mode="widthFix" class="img_start"></image>
+				<image src="../../static/4.png" mode="widthFix" class="img_start"></image>
+
+				<button type="" :plain="true" @click="()=>onSwitch(STATUS_MAP.playing)">开始挑战</button>
 			</view>
 
 			<view class="" v-else-if="isPlaying">
-				<view>第{{ currentIndex + 1 }} 题</view>
-				<view class="">
-					{{ currentQuiz.quiz }}
+				<view class="title">
+					<view class="t">第{{ currentIndex + 1 }} 题</view>
+					<view class="content">
+						{{ currentQuiz.quiz }}
+					</view>
 				</view>
 
+
+				<view class="btn_box">
+					<view class="btn" v-for="(quiz, index) in currentQuiz.options">
+						<u-button :disabled="isSelected" :type="currentType(index)" @click="()=>onSelect(index)"
+							:plain="true" :text="quiz" :key="index" />
+					</view>
+				</view>
+
+				<button :disabled="!isSelected" type="default" @click="onNext" v-if="!lastQuiz">{{ nextText }}</button>
+				<button :disabled="!isSelected" open-type="chooseAvatar" v-else @chooseavatar="choose">{{ nextText }}</button>
 				<view>
-					<u-button :disabled="isSelected" :type="currentType(index)" @click="()=>onSelect(index)"
-						:plain="true" :text="quiz" v-for="(quiz, index) in currentQuiz.options" class="btn" />
+					<u-rate :count="countError" v-model="COUNT_ERROE" readonly></u-rate>
 				</view>
-
-				<button :disabled="!isSelected" type="default" @click="onNext">{{ nextText }}</button>
 				<view class="">
 					{{ feedbackText }}
 				</view>
-				<view>
-					<u-icon name="heart-fill" size="28"></u-icon>
-				</view>
+
 
 			</view>
-			<view class="" v-else>
-				<img src="https://upload.wikimedia.org/wikipedia/commons/9/94/%E6%9D%9C%E5%A6%82%E6%99%A6.jpg" width="50" alt="">
-				<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/%E6%88%BF%E7%8E%84%E9%BE%84.jpg" width="50" alt="">
+			<view class="end-container" v-else>
+				<img class="img1"
+					src="https://upload.wikimedia.org/wikipedia/commons/9/94/%E6%9D%9C%E5%A6%82%E6%99%A6.jpg"
+					width="50%" alt="">
+				<img class="img2"
+					src="https://upload.wikimedia.org/wikipedia/commons/a/a7/%E6%88%BF%E7%8E%84%E9%BE%84.jpg"
+					width="50%" alt="">
+				<view class="avatar">
+					<u-avatar :src="avatar" ></u-avatar>
+				</view>
 				<button type="default" @click="()=>onSwitch(STATUS_MAP.ready)">再来一次</button>
 			</view>
 		</transition>
@@ -43,16 +63,19 @@
 		COUNT_ERROE,
 		GOOD_WORDS,
 		COUNT_CORRECT,
+		IMG_URL,
 	} from '@/constants/index.js'
 	import {
 		getRandomArray
 	} from '@/utils/index.js'
+	import ql from '@/constants/quiz.js'
 
 	export default {
 		data() {
 			return {
-				// status: STATUS_MAP.ready,// 当前状态， 准备 / 开始 /结束
-				status: STATUS_MAP.end,
+				// status: STATUS_MAP.ready, // 当前状态， 准备 / 开始 /结束
+				status: STATUS_MAP.playing,
+				// status: STATUS_MAP.end,
 				STATUS_MAP,
 				quizList: [], // all data
 				currentIndex: 0, // 当前题号
@@ -63,6 +86,8 @@
 				countError: COUNT_ERROE, // 错误机会
 				goodList: [], // 夸人列表
 				GOOD_WORDS,
+				COUNT_ERROE,
+				avatar: IMG_URL.avatar
 			}
 		},
 		computed: {
@@ -112,23 +137,12 @@
 			}
 		},
 		created() {
-			const that = this;
-			uni.request({
-				url: '/static/quiz.json',
-				success(res) {
-					if (res?.data?.length) {
-						that.quizList = res.data;
-						that.rankList = getRandomArray(0, that.quizList.length, TOTAL_NUMBER);
-						that.goodList = getRandomArray(0, GOOD_WORDS.length, COUNT_CORRECT);
-						console.log('rankList', that.rankList)
-					}
-				},
-				fail() {
-					uni.showToast({
-						title: '数据请求失败，请稍后再试',
-					})
-				}
-			})
+			const data = ql;
+			this.quizList = data;
+			this.rankList = getRandomArray(0, this.quizList.length, TOTAL_NUMBER);
+			this.goodList = getRandomArray(0, GOOD_WORDS.length, COUNT_CORRECT);
+			console.log('rankList', this.rankList)
+
 		},
 		methods: {
 			onSwitch(val = STATUS_MAP.ready) {
@@ -145,6 +159,7 @@
 			},
 			onNext() {
 				if (this.lastQuiz) {
+					this.onSwitch(STATUS_MAP.end);
 					return
 				}
 				this.currentIndex += 1;
@@ -158,6 +173,10 @@
 				this.reset();
 				this.currentIndex = 0;
 				this.countError = COUNT_ERROE;
+			},
+			choose(e) {
+				this.avatar = e.detail.avatarUrl;
+				this.onNext();
 			},
 			currentType(index) {
 				if (!this.isSelected) {
@@ -175,13 +194,13 @@
 	}
 </script>
 
-<style>
-
+<style lang="scss">
 	.container {
 		width: 100vw;
 		height: 100vh;
 		/* background-image: url('@/static/bg.png'); */
 		position: relative;
+		background-color: #E1E0C7;
 	}
 
 	.start-container {
@@ -194,8 +213,9 @@
 		/* position: absolute; */
 		/* top: 50%; */
 		/* transform: translateY(-50%); */
-
 	}
+
+	.img_start {}
 
 	.fade-enter-active,
 	.fade-leave-active {
@@ -209,5 +229,41 @@
 
 	.btn {
 		margin: 10px auto;
+	}
+
+	.btn_box {}
+
+	.title {
+		position: relative;
+
+		.t {
+			text-align: center;
+		}
+
+		;
+
+		.content {
+			text-align: center;
+		}
+	}
+
+	.end-container {
+		position: relative;
+
+		.img1 {
+			width: 50%;
+		}
+
+		.img2 {
+			width: 50%;
+		}
+
+		.avatar {
+			left: 50%;
+			transform: translateX(-50%);
+			top: 10%;
+			position: absolute;
+			z-index: 100;
+		}
 	}
 </style>
