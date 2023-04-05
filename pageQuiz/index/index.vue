@@ -14,7 +14,7 @@
 
 			<view class="" v-else-if="isPlaying">
 				<view class="title">
-					<view class="t">第{{ currentIndex + 1 }} 题</view>
+					<view class="t">第 {{ currentIndex + 1 }} 题</view>
 					<view class="content">
 						{{ currentQuiz.quiz }}
 					</view>
@@ -28,8 +28,10 @@
 					</view>
 				</view>
 
-				<button :disabled="!isSelected" type="default" @click="onNext" v-if="!lastQuiz">{{ nextText }}</button>
-				<button :disabled="!isSelected" open-type="chooseAvatar" v-else @chooseavatar="choose">{{ nextText }}</button>
+				<button :disabled="!isSelected" type="default" @click="onNext"
+					v-if="!lastQuiz || hasAvatar">{{ nextText }}</button>
+				<button :disabled="!isSelected" open-type="chooseAvatar" v-else
+					@chooseavatar="choose">{{ nextText }}</button>
 				<view>
 					<u-rate :count="countError" v-model="COUNT_ERROE" readonly></u-rate>
 				</view>
@@ -47,9 +49,9 @@
 					src="https://upload.wikimedia.org/wikipedia/commons/a/a7/%E6%88%BF%E7%8E%84%E9%BE%84.jpg"
 					width="50%" alt="">
 				<view class="avatar">
-					<u-avatar :src="avatar" ></u-avatar>
+					<u-avatar :src="avatar" size="60"></u-avatar>
 				</view>
-				<button type="default" @click="()=>onSwitch(STATUS_MAP.ready)">再来一次</button>
+				<button type="default" @click="onAgain">再来一次</button>
 			</view>
 		</transition>
 	</view>
@@ -73,8 +75,8 @@
 	export default {
 		data() {
 			return {
-				// status: STATUS_MAP.ready, // 当前状态， 准备 / 开始 /结束
-				status: STATUS_MAP.playing,
+				status: STATUS_MAP.ready, // 当前状态， 准备 / 开始 /结束
+				// status: STATUS_MAP.playing,
 				// status: STATUS_MAP.end,
 				STATUS_MAP,
 				quizList: [], // all data
@@ -87,7 +89,8 @@
 				goodList: [], // 夸人列表
 				GOOD_WORDS,
 				COUNT_ERROE,
-				avatar: IMG_URL.avatar
+				avatar: IMG_URL.avatar,
+				hasAvatar: false,
 			}
 		},
 		computed: {
@@ -142,7 +145,11 @@
 			this.rankList = getRandomArray(0, this.quizList.length, TOTAL_NUMBER);
 			this.goodList = getRandomArray(0, GOOD_WORDS.length, COUNT_CORRECT);
 			console.log('rankList', this.rankList)
-
+			const aL = uni.getStorageSync('avatar');
+			if (aL) {
+				this.avatar = aL;
+				this.hasAvatar = true;
+			}
 		},
 		methods: {
 			onSwitch(val = STATUS_MAP.ready) {
@@ -176,7 +183,13 @@
 			},
 			choose(e) {
 				this.avatar = e.detail.avatarUrl;
+				uni.setStorageSync('avatar', this.avatar);
+				this.hasAvatar = true;
 				this.onNext();
+			},
+			onAgain() {
+				this.resetAll();
+				this.onSwitch(STATUS_MAP.playing);
 			},
 			currentType(index) {
 				if (!this.isSelected) {
