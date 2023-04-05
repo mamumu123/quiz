@@ -10,7 +10,7 @@
             "path" : "pageQuiz/index/index",
             "style" :                                                                                    
             {
-                "navigationBarTitleText": "quiz",
+                "navigationBarTitleText": "答题小程序",
                 "enablePullDownRefresh": true
             }
             
@@ -29,5 +29,7 @@
 	        // npm安装方式  
 	        // "^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"  
 	    },
-	"uniIdRouter": {}
+	"uniIdRouter": {},
+	"lazyCodeLoading": "requiredComponents"
+	
 }
