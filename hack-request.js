@@ -1,8 +1,7 @@
 // import store from '@/stores';
+// const RIGHT_CODE = 20000;
 	
 uni.urequest = function(options) {
-	
-	// const { token } = store;
 	
 	// 默认配置
 	const OPT = Object.assign({
@@ -34,15 +33,15 @@ uni.urequest = function(options) {
 				} = result || {};
 				
 				// 如果请求的 code 状态码不正确
-				if (code !== 20000) {
-					options.fail && options.fail({
-						errMsg: msg,
-						err: msg,
-						code,
-					});
-					REJ(res);
-					return;
-				}
+				// if (code !== RIGHT_CODE) {
+				// 	options.fail && options.fail({
+				// 		errMsg: msg,
+				// 		err: msg,
+				// 		code,
+				// 	});
+				// 	REJ(res);
+				// 	return;
+				// }
 				
 				options.success && options.success(data);
 				RES(data);
