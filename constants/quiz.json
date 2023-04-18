@@ -1,4 +1,4 @@
-export default [{
+[{
 	"__v" : 0,
 	"_id" : "ObjectId(5a5ecf926fa5c97ef40d9d1b)",
 	"answer" : 4,
