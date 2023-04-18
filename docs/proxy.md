@@ -9,7 +9,7 @@
 在小程序开发中，有很多限制，其中有一个限制就是：当小程序需要请求后端接口时，对后端域名有一些限制：[限制说明](https://developers.weixin.qq.com/miniprogram/dev/framework/ability/domain.html#%E9%99%90%E5%88%B6%E8%AF%B4%E6%98%8E)
 
 - 域名只支持https协议，不支持IP地址；
-- 业务域名需经过ICP备案，新备案域名需24小时后才可配置；
+- 业务域名需经过ICP备案；
 
 这就导致个人开发者和个人开发学习会比较麻烦，需要找一些方式绕过这个限制。
 
@@ -20,8 +20,7 @@
 前端访问跨域资源时，是存在跨域限制的；
 前端请求资源限制
 
-``` 
-```
+TODO: 前端 - 后端
 
 而服务器访问服务资源时是没有问题的。通过这个方式，我们在前端工程化开发中，配置 devServer , 本地开启一个代理服务器。前端先请求道代理服务器，然后由代理服务器请求真正的服务端接口，然后在拿到数据以后，返回请求数据。
 
@@ -30,7 +29,7 @@
 
 
 
-TODO:
+TODO: 前端 - 代理服务器 - 服务器
 补一张图
 
 ### 云函数代理
@@ -46,6 +45,19 @@ TODO:
 小程序中，请求数据使用的 request。如果是原生小程序
 `wx.request`,如果是 uni-app, 使用  ` uni.request`。
 我们实现一个新的函数。
+
+在这个函数中，我们请求云函数
+```js
+uniCloud.callFunction({
+			name: 'hack-request',
+			data: {
+				...
+			},
+			success: res => {},
+			fail: err => {}
+})
+```
+
 
 
 
@@ -73,11 +85,19 @@ exports.main = (evt, ctx) => {
 
 
 #### 如何使用
+和正常的小程序请求方式一样，只是调用的是我们做了拦截处理的请求函数 ，urequest(叫什么都可以)
+
 ```js
-uni.urequest = function(options) {
-
-}
-
+				uni.urequest({
+					url: this.requestUrl,
+					method: "POST",
+					data: {
+					},
+					success: (res) => {
+					},
+					fail(err) {
+					}
+				}),
 ```
 
 
